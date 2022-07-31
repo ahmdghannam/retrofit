@@ -4,6 +4,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface NamesApi {
-    @GET("/random/random")
-    suspend fun getNames(): Response<List<Person>>
+    @GET("/10?format=json")
+    suspend fun getNames(): Response<List<String>>
 }
+

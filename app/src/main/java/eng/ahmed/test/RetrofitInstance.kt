@@ -8,7 +8,7 @@ object RetrofitInstance {
     val api:NamesApi by lazy {
           Retrofit
             .Builder()
-            .baseUrl("https://api.name-fake.com")
+            .baseUrl("http://names.drycodes.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(NamesApi::class.java)
