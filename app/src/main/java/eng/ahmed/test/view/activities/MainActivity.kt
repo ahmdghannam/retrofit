@@ -1,20 +1,22 @@
-package eng.ahmed.test
+package eng.ahmed.test.view.activities
 
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import eng.ahmed.test.*
 import eng.ahmed.test.databinding.ActivityMainBinding
+import eng.ahmed.test.model.Name
 import java.lang.Exception
-import androidx.activity.viewModels
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var adapter: MyAdapter
+    private lateinit var recyclerViewAdapter: RecyclerViewAdapter
     private lateinit var binding: ActivityMainBinding
-    private val namesViewModel: NamesViewModel by viewModels{
+
+    private val namesViewModel: NamesViewModel by viewModels {
         NamesViewModelFactory((application as NamesApplication).repository)
     }
 
@@ -28,6 +30,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupRv() {
+        recyclerViewAdapter = RecyclerViewAdapter()
+        binding.rv.adapter = recyclerViewAdapter
+        binding.rv.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun initViewModel() {
+//        namesViewModel.allNames.observe(this) { names ->
+//            names.let {
+//                adapter.submitList(it)
+//            }
+//        }
+    }
+
     private suspend fun getResponse() {
         val response = try {
             RetrofitInstance.api.getNames()
@@ -37,30 +53,21 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (response.isSuccessful && response.body() != null) {
-            val list=response.body()!!
+            val list = response.body()!!
 
-            namesViewModel.allNames.observe(this) { names ->
-                names.let {
-                    adapter.submitList(it)
-                }
+            // insert to the room database
+            list.forEach {
+//              TimeUnit.SECONDS.sleep(1L)
+                namesViewModel.insert(
+                    Name(it)
+                )
             }
 
-//            adapter.people=list
-            list.forEach {
-//                TimeUnit.SECONDS.sleep(1L)
-                namesViewModel.insert(Name(it)
-                )}
+            val names = namesViewModel.getNamesFromDB()
+            recyclerViewAdapter.submitList(names)
 
-
-            adapter.notifyDataSetChanged()
         } else {
             Log.e("MainActivity", "Response not successful")
         }
-    }
-
-    private fun setupRv() {
-        adapter = MyAdapter()
-        binding.rv.adapter = adapter
-        binding.rv.layoutManager = LinearLayoutManager(this)
     }
 }

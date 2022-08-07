@@ -1,4 +1,4 @@
-package eng.ahmed.test
+package eng.ahmed.test.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
